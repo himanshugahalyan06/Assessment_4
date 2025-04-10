@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .quiz-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .options {
+            margin-top: 10px;
+        }
+
+        .option {
+            margin: 5px 0;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .option:hover {
+            background-color: #e9e9e9;
+        }
+
+        .selected {
+            background-color: #d4edda;
+        }
+
+        .correct {
+            background-color: #d4edda;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #e2e3e5;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="quiz-container">
+        <h1>Quiz App</h1>
+        <div class="progress">Question <span id="current-question">1</span> of <span id="total-questions">20</span>
+        </div>
+        <div id="quiz">
+
+        </div>
+        <button id="submit-btn">Submit Quiz</button>
+        <div id="results" class="results hidden">
+            <div class="score">Your score: <span id="score">0</span>/<span id="total">20</span></div>
+            <div id="result-details"></div>
+            <button id="retake-btn">Retake Quiz</button>
+        </div>
+    </div>
+
+    <script>
+
+        const quizQuestions = [
+            {
+                question: "What is the capital of France?",
+                options: ["London", "Berlin", "Paris", "Madrid"],
+                answer: 2
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                answer: 1
+            },
+            {
+                question: "What is the largest mammal?",
+                options: ["Elephant", "Blue Whale", "Giraffe", "Polar Bear"],
+                answer: 1
+            },
+            {
+                question: "Which language runs in a web browser?",
+                options: ["Java", "C", "Python", "JavaScript"],
+                answer: 3
+            },
+            {
+                question: "What year was JavaScript launched?",
+                options: ["1996", "1995", "1994", "None of the above"],
+                answer: 1
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+                answer: 2
+            },
+            {
+                question: "What is the hardest natural substance on Earth?",
+                options: ["Gold", "Iron", "Diamond", "Quartz"],
+                answer: 2
+            },
+            {
+                question: "Which country won the 2018 FIFA World Cup?",
+                options: ["Germany", "Brazil", "France", "Argentina"],
+                answer: 2
+            },
+            {
+                question: "How many continents are there?",
+                options: ["5", "6", "7", "8"],
+                answer: 2
+            },
+            {
+                question: "What is the largest ocean on Earth?",
+                options: ["Atlantic", "Indian", "Arctic", "Pacific"],
+                answer: 3
+            },
+            {
+                question: "Which element has the chemical symbol 'O'?",
+                options: ["Gold", "Oxygen", "Osmium", "Oganesson"],
+                answer: 1
+            },
+            {
+                question: "Who wrote 'To Kill a Mockingbird'?",
+                options: ["Harper Lee", "Mark Twain", "J.K. Rowling", "Ernest Hemingway"],
+                answer: 0
+            },
+            {
+                question: "What is the currency of Japan?",
+                options: ["Won", "Yen", "Yuan", "Ringgit"],
+                answer: 1
+            },
+            {
+                question: "Which company developed the iPhone?",
+                options: ["Samsung", "Apple", "Google", "Microsoft"],
+                answer: 1
+            },
+            {
+                question: "How many bones are in the adult human body?",
+                options: ["206", "300", "150", "412"],
+                answer: 0
+            },
+            {
+                question: "Who was the first person to walk on the moon?",
+                options: ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Alan Shepard"],
+                answer: 1
+            },
+            {
+                question: "What is the largest country by area?",
+                options: ["China", "United States", "Canada", "Russia"],
+                answer: 3
+            },
+            {
+                question: "Which planet is closest to the sun?",
+                options: ["Venus", "Mercury", "Earth", "Mars"],
+                answer: 1
+            },
+            {
+                question: "What is the main ingredient in guacamole?",
+                options: ["Tomato", "Avocado", "Onion", "Pepper"],
+                answer: 1
+            },
+            {
+                question: "Which year did World War II end?",
+                options: ["1943", "1945", "1947", "1950"],
+                answer: 1
+            }
+        ];
+
+
+        const quizContainer = document.getElementById('quiz');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results');
+        const scoreElement = document.getElementById('score');
+        const totalElement = document.getElementById('total');
+        const resultDetailsElement = document.getElementById('result-details');
+        const retakeBtn = document.getElementById('retake-btn');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsElement = document.getElementById('total-questions');
+
+
+        let userAnswers = new Array(quizQuestions.length).fill(null);
+        let quizSubmitted = false;
+        let currentQuestionIndex = 0;
+
+
+        function initQuiz() {
+            quizContainer.innerHTML = '';
+            userAnswers.fill(null);
+            quizSubmitted = false;
+            currentQuestionIndex = 0;
+            resultsContainer.classList.add('hidden');
+            totalQuestionsElement.textContent = quizQuestions.length;
+
+            displayQuestion(currentQuestionIndex);
+        }
+
+
+        function displayQuestion(index) {
+            quizContainer.innerHTML = '';
+            currentQuestionElement.textContent = index + 1;
+
+            const question = quizQuestions[index];
+            const questionElement = document.createElement('div');
+            questionElement.className = 'question';
+            questionElement.innerHTML = `
+                <h3>${index + 1}. ${question.question}</h3>
+                <div class="options" id="options-${index}"></div>
+            `;
+
+            const optionsContainer = questionElement.querySelector(`.options`);
+
+            question.options.forEach((option, optionIndex) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                if (userAnswers[index] === optionIndex) {
+                    optionElement.classList.add('selected');
+                }
+                optionElement.textContent = option;
+                optionElement.dataset.questionIndex = index;
+                optionElement.dataset.optionIndex = optionIndex;
+
+                optionElement.addEventListener('click', () => {
+                    if (!quizSubmitted) {
+                        selectOption(index, optionIndex);
+                    }
+                });
+
+                optionsContainer.appendChild(optionElement);
+            });
+
+
+            const navButtons = document.createElement('div');
+            navButtons.style.marginTop = '20px';
+
+            if (index > 0) {
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.addEventListener('click', () => {
+                    displayQuestion(index - 1);
+                });
+                navButtons.appendChild(prevButton);
+            }
+
+            if (index < quizQuestions.length - 1) {
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.addEventListener('click', () => {
+                    displayQuestion(index + 1);
+                });
+                navButtons.appendChild(nextButton);
+            } else {
+                const submitButton = document.createElement('button');
+                submitButton.textContent = 'Submit Quiz';
+                submitButton.addEventListener('click', submitQuiz);
+                navButtons.appendChild(submitButton);
+            }
+
+            questionElement.appendChild(navButtons);
+            quizContainer.appendChild(questionElement);
+        }
+
+
+        function selectOption(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            displayQuestion(questionIndex);
+        }
+
+
+        function submitQuiz() {
+            quizSubmitted = true;
+            let score = 0;
+
+
+            quizQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                }
+            });
+
+
+            scoreElement.textContent = score;
+            totalElement.textContent = quizQuestions.length;
+
+
+            let resultDetails = '<h3>Results:</h3>';
+            quizQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.answer;
+
+                resultDetails += `
+                    <div class="question-result">
+                        <p><strong>Question ${index + 1}:</strong> ${question.question}</p>
+                        <p>Your answer: ${userAnswer !== null ? question.options[userAnswer] : 'Not answered'} 
+                        <span style="color: ${isCorrect ? 'green' : 'red'}">(${isCorrect ? 'Correct' : 'Incorrect'})</span></p>
+                        ${!isCorrect ? `<p>Correct answer: ${question.options[question.answer]}</p>` : ''}
+                    </div>
+                    <hr>
+                `;
+            });
+
+            resultDetailsElement.innerHTML = resultDetails;
+            resultsContainer.classList.remove('hidden');
+        }
+
+
+        submitBtn.addEventListener('click', submitQuiz);
+        retakeBtn.addEventListener('click', initQuiz);
+
+
+        initQuiz();
+    </script>
+</body>
+
+</html>
